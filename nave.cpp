@@ -58,6 +58,7 @@ public:
     NAVE(int _x, int _y, int _corazones, int _vidas): x(_x), y(_y), corazones(_corazones), vidas (_vidas) {/* //pasando los datos al constructor */}
     int X(){return x;}//Las cordenadas de la nave son privadas entonces necesitamos pasarlas por este metodo
     int Y(){return y;}//Las cordenadas de la nave son privadas entonces necesitamos pasarlas por este metodo
+    int VID(){ return vidas;} //Metodo para acceder al numero de vidas
     void pintar();
     void borrar();
     void mover();
@@ -70,6 +71,8 @@ class AST{
     int x,y;
 public:
     AST(int _x, int _y): x(_x), y(_y){/* //se pasan los datos al cosntructor */}
+    int X (){ return x;}
+    int Y (){ return y;}
     void pintar();
     void mover();
     void choque(class NAVE &N);
@@ -187,6 +190,8 @@ bool PROYECTIL::fuera(){
     if(y == 4 ) return true;
     return false;
 }
+
+
 int main(){
     pintarLimites();
     OcultarCursor();
@@ -212,8 +217,11 @@ int main(){
     
 
     bool gameover = false ;
+    int puntos = 0;
 
     while(!gameover){
+
+        gotoxy(4,2);printf("Puntos: %d",puntos); //Declaramos los puntos dentro del campo de vision
 
         if(kbhit()){
             char tecla = getch();
@@ -221,7 +229,7 @@ int main(){
             B.push_back(new PROYECTIL( N.X()+2 , N.Y()-1 ));
             
         }
-        for(it = B.begin(); it != B.end() ; it ++){
+        for(it = B.begin(); it != B.end() ; it ++){ //Reccorremos la lista de los proyectiles
 
             (*it)->mover();/* Desreferenciamos el puntero y movemos los proyectiles */
             if((*it)->fuera()){ /* Caso en que la bala llega al limite del videojuego */
@@ -232,16 +240,46 @@ int main(){
 
         }
 
-        for(itA= A.begin(); itA != A.end(); itA++){
+        for(itA= A.begin(); itA != A.end(); itA++){ //Reccorremos la lista de las balas
             (*itA)->mover();
             (*itA)->choque(N);
         }
+
+        for(itA = A.begin(); itA != A.end(); itA++){
+            for(it = B.begin(); it != B.end() ; it ++){
+                if((*itA)->X() == (*it)->X() && ( (*itA)->Y()+1 == (*it)->Y() ) ||  (*itA)->Y() == (*it)->Y() ){
+
+                    gotoxy((*it)->X(),(*it)->Y()); printf(" "); // Situamos el proyectil al momento de la colision con el asteroide y lo borramos
+                    delete(*it);
+                    it = B.erase(it);
+
+                    A.push_back(new AST(rand()%74 +3 , 4));
+                    gotoxy((*itA)->X(),(*itA)->Y()); printf(" ");
+                    delete(*itA);
+                    itA = A.erase(itA);
+
+                    puntos+=5; //Incrementamos los puntos
+                }
+
+            }
+        }
+
+        if(N.VID() == 0) gameover = true;
+
         
         N.morir();
         N.mover();
         Sleep(35);
     }
+    system("cls");
+
+    printf("        *******************************************************************************          \n");
+    printf("        *******************************************************************************          \n");
+    printf("        ******************             GAME  OVER          ****************************          \n");
+    printf("        *******************************************************************************          \n");
+    printf("        *******************************************************************************          \n");
 
 
+    getch();
     return  0;
 }
