@@ -54,11 +54,14 @@ class NAVE{
     int vidas;
 public:
     NAVE(int _x, int _y, int _corazones, int _vidas): x(_x), y(_y), corazones(_corazones), vidas (_vidas) {/* //pasando los datos al constructor */}
+    int X(){return x;}//Las cordenadas de la nave son privadas entonces necesitamos pasarlas por este metodo
+    int Y(){return y;}//Las cordenadas de la nave son privadas entonces necesitamos pasarlas por este metodo
     void pintar();
     void borrar();
     void mover();
     void pintar_corazones();
     void morir();
+    void COR(){ corazones--; };
 };
 
 class AST{
@@ -67,6 +70,7 @@ public:
     AST(int _x, int _y): x(_x), y(_y){/* //se pasan los datos al cosntructor */}
     void pintar();
     void mover();
+    void choque(class NAVE &N);
 };
 
 void NAVE::pintar(){
@@ -148,12 +152,24 @@ void AST::mover(){
     pintar(); 
 }
 
+void AST::choque(class NAVE &N){
+    if( x >= N.X() && x < N.X()+6 && y >= N.Y() && N.Y()+2)/* Tomamos el ancho y alto  de la nave pasados por parametro mediante la clase NAVE &N */{
+
+        N.COR();//Llamamos al metodo que resta corazones en caso de que el asteroide choque con la nave 
+        N.borrar();
+        N.pintar();
+        N.pintar_corazones();
+        x = rand() % 71 +4;
+        y = 4;
+
+    }
+}
 
 int main(){
     pintarLimites();
     OcultarCursor();
     NAVE N(7,7,3,3);
-    AST ast(10,4);
+    AST ast(10,4),ast1(4,8),ast2(15,10);
 
 
     N.pintar();
@@ -163,10 +179,14 @@ int main(){
     bool gameover = false ;
 
     while(!gameover){
-        ast.mover();
+
+        ast.mover(); ast.choque(N);
+        ast1.mover(); ast1.choque(N);
+        ast2.mover(); ast2.choque(N);
+
         N.morir();
         N.mover();
-             Sleep(30);
+        Sleep(10);
     }
 
 
