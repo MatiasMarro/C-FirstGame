@@ -79,7 +79,10 @@ class PROYECTIL{
     int x, y;
 public:
     PROYECTIL(int _x, int _y): x(_x), y(_y){/* //Se pasan los datos al consturctor */}
+    int X(){return x;}
+    int Y(){return y;}
     void mover ();
+    bool fuera();// funcion para verificar si el proyectil llego a los limites del entorno del video juego
 };
 
 void NAVE::pintar(){
@@ -151,12 +154,6 @@ void AST::pintar(){
     gotoxy(x,y);printf("%c",184);
 }
 
-void PROYECTIL::mover(){
-    gotoxy(x,y); printf(" ");
-    if(y > 4 ) y--;
-    gotoxy(x,y); printf("^");
-}
-
 void AST::mover(){
     gotoxy(x,y); printf(" ");
     y++;
@@ -180,18 +177,38 @@ void AST::choque(class NAVE &N){
     }
 }
 
+void PROYECTIL::mover(){
+    gotoxy(x,y); printf(" ");
+    y--;
+    gotoxy(x,y); printf("^");
+}
+
+bool PROYECTIL::fuera(){
+    if(y == 4 ) return true;
+    return false;
+}
 int main(){
     pintarLimites();
     OcultarCursor();
-    NAVE N(7,7,3,3);
-    AST ast(10,4),ast1(4,8),ast2(15,10);
+    NAVE N(37,30,3,3);
+    N.pintar();
+    N.pintar_corazones();
+
+    list<AST*> A;
+    list<AST*>::iterator itA;
+    for(int i=0; i<5;i++){
+
+        A.push_back(new AST(rand()%75 +3 , rand()%5+4));
+
+    }
+      
+    
 
     list<PROYECTIL*> B; //Creamos lista con elementos de la clase bala pasados con punteros llamada B
     list<PROYECTIL*>::iterator it; // Creamos iterador para recorrer toda la lista B
 
 
-    N.pintar();
-    N.pintar_corazones();
+    
     
 
     bool gameover = false ;
@@ -206,15 +223,20 @@ int main(){
         }
         for(it = B.begin(); it != B.end() ; it ++){
 
-            (*it)/* Desreferenciamos el puntero */->mover();
+            (*it)->mover();/* Desreferenciamos el puntero y movemos los proyectiles */
+            if((*it)->fuera()){ /* Caso en que la bala llega al limite del videojuego */
+                gotoxy((*it)->X(),(*it)->Y()); printf(" ");
+                delete (*it);// Eliminamos un elemento de la lista con el operador 'delete'
+                it = B.erase(it); // Toma el siguiente valor de la lista B para seguir verificando las operaciones del condicional.
+            }
 
         }
-         
 
-        ast.mover(); ast.choque(N);
-        ast1.mover(); ast1.choque(N);
-        ast2.mover(); ast2.choque(N);
-
+        for(itA= A.begin(); itA != A.end(); itA++){
+            (*itA)->mover();
+            (*itA)->choque(N);
+        }
+        
         N.morir();
         N.mover();
         Sleep(35);
