@@ -3,6 +3,8 @@
 #include <conio.h>
 #include <wincon.h>
 #include <stdlib.h>
+#include <list>
+using namespace std;
 
 #define ARRIBA 72
 #define IZQUIERDA 75
@@ -71,6 +73,13 @@ public:
     void pintar();
     void mover();
     void choque(class NAVE &N);
+};
+
+class PROYECTIL{
+    int x, y;
+public:
+    PROYECTIL(int _x, int _y): x(_x), y(_y){/* //Se pasan los datos al consturctor */}
+    void mover ();
 };
 
 void NAVE::pintar(){
@@ -142,6 +151,12 @@ void AST::pintar(){
     gotoxy(x,y);printf("%c",184);
 }
 
+void PROYECTIL::mover(){
+    gotoxy(x,y); printf(" ");
+    if(y > 4 ) y--;
+    gotoxy(x,y); printf("^");
+}
+
 void AST::mover(){
     gotoxy(x,y); printf(" ");
     y++;
@@ -171,6 +186,9 @@ int main(){
     NAVE N(7,7,3,3);
     AST ast(10,4),ast1(4,8),ast2(15,10);
 
+    list<PROYECTIL*> B; //Creamos lista con elementos de la clase bala pasados con punteros llamada B
+    list<PROYECTIL*>::iterator it; // Creamos iterador para recorrer toda la lista B
+
 
     N.pintar();
     N.pintar_corazones();
@@ -180,13 +198,26 @@ int main(){
 
     while(!gameover){
 
+        if(kbhit()){
+            char tecla = getch();
+            if(tecla == 'a')
+            B.push_back(new PROYECTIL( N.X()+2 , N.Y()-1 ));
+            
+        }
+        for(it = B.begin(); it != B.end() ; it ++){
+
+            (*it)/* Desreferenciamos el puntero */->mover();
+
+        }
+         
+
         ast.mover(); ast.choque(N);
         ast1.mover(); ast1.choque(N);
         ast2.mover(); ast2.choque(N);
 
         N.morir();
         N.mover();
-        Sleep(10);
+        Sleep(35);
     }
 
 
